@@ -3,6 +3,7 @@ from pygcn.utils import conlleval, pad_sequences, batch_yield, tag2label, read_d
 from pygcn.conf import config, args, paths
 import os
 from hyperopt import fmin, Trials, hp, STATUS_OK, tpe
+import codecs
 
 def train():
     root = os.getcwd()
@@ -31,9 +32,10 @@ def target(param):
     # train && dev data
     train_data = read_corpus(os.path.join(root, paths['train_data_path']))
     dev_data = read_corpus(os.path.join(root, paths['dev_data_path']))
-    model = GCNNerModel(param)
+    model = GCNNerModel(**param)
     model._build_graph()
-    model.train(train_data, dev_data)
+    f1 = model.train(train_data, dev_data)
+    return {'F1_loss': f1, 'status': STATUS_OK}
 
 def get_param(iters):
     root = os.getcwd()
@@ -64,7 +66,17 @@ def get_param(iters):
         'shuffle': False,
         'flag': 'att',
     }
+    # Trials对象允许我们在每个时间步存储信息
+    trials = Trials()
 
+    # 函数fmin首先接受一个函数来最小化，algo参数指定搜索算法，最大评估次数max_evals
+    best = fmin(get_param, space4ner, algo=tpe.suggest, max_evals=1000, trials=trials)
+    fp = codecs.open(os.path.join(root, 'remin/get_param.txt'), 'a+', encoding="utf-8")
+    fp.write(str(best) + '\n')
+    print('best:', best)
+    print('trials:')
+    for trial in trials.trials:
+        fp.write(str(trial)+'\n')
 
 if __name__ == '__main__':
     train()

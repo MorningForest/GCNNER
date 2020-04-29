@@ -241,7 +241,6 @@ class GCNNerModel(object):
                 self.run_one_epoch(sess, train, dev, self.tag2label, epoch, saver)
         return self.f1
 
-
     def run_one_epoch(self, sess, train, dev, tag2label, epoch, saver):
         """
         :param sess:
@@ -265,7 +264,7 @@ class GCNNerModel(object):
                                                          feed_dict=feed_dict)
 
             if step + 1 == 1 or (step + 1) % 100 == 0 or step + 1 == num_batches:
-                print(
+                self.logger.info(
                     '{} epoch {}, step {}, loss: {:.4}, global_step: {}'.format(start_time, epoch + 1, step + 1,
                                                                                 loss_train, step_num))
 
