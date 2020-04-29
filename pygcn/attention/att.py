@@ -91,7 +91,7 @@ class Att(object):
         return outputs
 
     def multiAttention_layer_op(self, queries, keys, values, num_heads,
-                                causality=False, scope="multihead_attention"):
+                                causality=False, scope="multihead_attention", scope1="att__1"):
         '''
           :param queries: 三维张量[N, T_q, d_model]
           :param keys: 三维张量[N, T_k, d_model]
@@ -115,7 +115,7 @@ class Att(object):
             V_ = tf.concat(tf.split(V, num_heads, axis=2), axis=0)  # (h*N, T_k, d_model/h)
             # Attention
             outputs = self.scaled_dot_product_attention(Q_, K_, V_, self.dropout_pl, training=True,
-                                                        causality=False)
+                                                        causality=False, scope=scope1)
             # Restore shape
             outputs = tf.concat(tf.split(outputs, num_heads, axis=0), axis=2)  # (N, T_q, d_model)
             # Residual connection

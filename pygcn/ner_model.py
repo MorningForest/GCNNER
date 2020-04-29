@@ -89,7 +89,6 @@ class GCNNerModel(object):
         self.word_embeddings = word_embeddings
 
     def __biLSTM_layer_op(self):
-        load_GCN_adjs(self.word_embeddings)
         with tf.variable_scope("bi-lstm"):
             cell_fw = LSTMCell(self.hidden_layer_size)
             cell_bw = LSTMCell(self.hidden_layer_size)
@@ -98,7 +97,8 @@ class GCNNerModel(object):
                 att_out = att1.multiAttention_layer_op(
                     queries=self.word_embeddings, keys=self.word_embeddings,
                     values=self.word_embeddings, num_heads=6,
-                    scope="bilstm_attention"
+                    scope="bilstm_attention",
+                    scope1='bilstm_att1'
                 )
                 (output_fw_seq, output_bw_seq), _ = tf.nn.bidirectional_dynamic_rnn(
                     cell_fw=cell_fw,
@@ -150,7 +150,8 @@ class GCNNerModel(object):
                 keys=self.word_embeddings,
                 values=self.word_embeddings,
                 num_heads=6,
-                scope='att1'
+                scope='att1',
+                scope1="att2_2"
             )
             Attoutput = tf.expand_dims(Attoutput, 1)
             conv1 = tf.nn.conv2d(
@@ -175,7 +176,8 @@ class GCNNerModel(object):
                 keys=input,
                 values=input,
                 num_heads=8,
-                scope='att2'
+                scope='att2',
+                scope1='att2_2'
             )
             Attoutput1 = tf.expand_dims(Attoutput1, 1)
             conv2 = tf.nn.conv2d(
