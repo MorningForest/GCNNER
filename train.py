@@ -1,4 +1,5 @@
-from pygcn import train
+from pygcn import train, get_param
 
 if __name__ == '__main__':
-    train()
+    # train()
+    get_param(100)

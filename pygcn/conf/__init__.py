@@ -1,5 +1,6 @@
 import os, argparse, time
 import tensorflow as tf
+from skopt.space import Real, Integer, Categorical
 
 ## Session configuration
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -50,3 +51,13 @@ paths['root_data'] = r'data'
 paths['embedd_path'] = r"data/renmin/word_word2vec_size300_win5.txt"
 paths['train_data_path'] = r"data/renmin/train_data"
 paths['dev_data_path'] = r"data/renmin/valid_data"
+
+##调参
+spacener = [
+        Real(low=0, high=1, name='dropout'),
+        Integer(low=200, high=300, name='hidden_layer_size'),
+        Real(low=5, high=10, name='clip'),
+        Categorical(categories=['Adam', 'Adadelta', 'Adagrad', 'RMSProp', 'Momentum', 'SGD'], name='optimizer'),
+        Integer(low=64, high=256, name='batch'),
+        Real(low=0.00001, high=0.1, name='lr')
+    ]

@@ -1,0 +1,2 @@
+best param: dropout:0.3641132042774911 hidden_size:278 clip:5.4435375746898 optimize:Adam batch:112 lr:0.08603913235334308
+best param: dropout:0.12715625567000013 hidden_size:291 clip:9.52793974414993 optimize:RMSProp batch:152 lr:0.06199545187370374
