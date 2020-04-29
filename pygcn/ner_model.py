@@ -4,9 +4,8 @@ from tensorflow.contrib.crf import crf_log_likelihood, viterbi_decode
 import time
 import sys
 import os
-from utils import batch_yield, pad_sequences, conlleval
-from sklearn import metrics
-from attention import Att
+from pygcn.utils import batch_yield, pad_sequences, conlleval
+from pygcn.attention import Att
 
 
 def GCN_layer_fw(embedding_size, hidden_layer_size, features, Adjs):
@@ -62,8 +61,8 @@ class GCNNerModel(object):
     def _build_graph(self):
         self.__add_placeholders()
         self.__lookup_layer_op()
-        self.__biLSTM_layer_op()
         self.__cnn_att_layer_op()
+        self.__biLSTM_layer_op()
         self.__loss_op()
         self.__trainstep_op()
         self.__init_op()

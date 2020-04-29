@@ -8,5 +8,5 @@ from .attention import Att
 
 __all__ = [
             'GCNNerModel', 'batch_yield', 'get_logger', 'pad_sequences',
-            'sentence2id', 'load_GCN_adjs', 'train', 'Att'
+            'sentence2id', 'load_GCN_adjs', 'train', 'Att',
 ]

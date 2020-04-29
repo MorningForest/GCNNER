@@ -46,7 +46,7 @@ paths['result_path'] = result_path
 if not os.path.exists(result_path): os.makedirs(result_path)
 log_path = os.path.join(result_path, "log.txt")
 paths['log_path'] = log_path
-paths['root_data'] = r'../data'
-paths['embedd_path'] = r"../data/renmin/word_word2vec_size300_win5.txt"
-paths['train_data_path'] = r"../data/renmin/train_data"
-paths['dev_data_path'] = r"../data/renmin/valid_data"
+paths['root_data'] = r'data'
+paths['embedd_path'] = r"data/renmin/word_word2vec_size300_win5.txt"
+paths['train_data_path'] = r"data/renmin/train_data"
+paths['dev_data_path'] = r"data/renmin/valid_data"
