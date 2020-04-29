@@ -32,7 +32,7 @@ class GCNNerModel(object):
     def __init__(self, embedding_size, dropout, hidden_layer_size, output_size, vocab
                      , embedding_weight, update_embedding_weight, optimizer, clip_grad
                      , summary_path, config, epoch, tag2label, batch_size, model_path
-                     , lr, logger, result_path, shuffle=False, flag=None, conv=False
+                     , lr, logger, result_path, shuffle=False, flag=None
                  ):
         self.embedding_size = embedding_size
         self.dropout = dropout
@@ -55,7 +55,8 @@ class GCNNerModel(object):
         self.result_path = result_path
         self.shuffle = shuffle
         self.flags = flag
-        self.conv = conv
+        self.conv = False
+        self.f1 = 0.
 
 
     def _build_graph(self):
@@ -238,6 +239,8 @@ class GCNNerModel(object):
 
             for epoch in range(self.epoch_num):
                 self.run_one_epoch(sess, train, dev, self.tag2label, epoch, saver)
+        return self.f1
+
 
     def run_one_epoch(self, sess, train, dev, tag2label, epoch, saver):
         """
@@ -261,19 +264,22 @@ class GCNNerModel(object):
             _, loss_train, summary, step_num_ = sess.run([self.train_op, self.loss, self.merged, self.global_step],
                                                          feed_dict=feed_dict)
 
-            if step + 1 == 1 or (step + 1) % 10 == 0 or step + 1 == num_batches:
+            if step + 1 == 1 or (step + 1) % 100 == 0 or step + 1 == num_batches:
                 print(
                     '{} epoch {}, step {}, loss: {:.4}, global_step: {}'.format(start_time, epoch + 1, step + 1,
                                                                                 loss_train, step_num))
 
             self.file_writer.add_summary(summary, step_num)
 
-            if step + 1 == num_batches:
-                saver.save(sess, self.model_path, global_step=step_num)
+            # if step + 1 == num_batches:
+            #     saver.save(sess, self.model_path, global_step=step_num)
 
         self.logger.info('===========validation / test===========')
         label_list_dev, seq_len_list_dev = self.dev_one_epoch(sess, dev)
-        self.evaluate(label_list_dev, seq_len_list_dev, dev, epoch)
+        f1 = self.evaluate(label_list_dev, seq_len_list_dev, dev, epoch)
+        if self.f1 < f1:
+            saver.save(sess, self.model_path, global_step=step_num)
+            self.f1 = f1
 
     def get_feed_dict(self, seqs, labels=None, lr=None, dropout=None):
         """
@@ -354,5 +360,8 @@ class GCNNerModel(object):
         epoch_num = str(epoch+1) if epoch != None else 'test'
         label_path = os.path.join(self.result_path, 'label_' + epoch_num)
         metric_path = os.path.join(self.result_path, 'result_metric_' + epoch_num)
-        for _ in conlleval(model_predict, label_path, metric_path):
+        for id, _ in enumerate(conlleval(model_predict, label_path, metric_path)):
             self.logger.info(_)
+            if id == 1:
+                f1 = _.split()[-1]
+        return float(f1)

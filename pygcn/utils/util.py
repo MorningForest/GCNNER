@@ -216,3 +216,5 @@ def load_embedding(embedding_path):
     print('Total %s word vectors.' % len(embeddings_index))
     return embeddings_index
 
+
+
