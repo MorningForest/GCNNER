@@ -153,14 +153,22 @@ class GCNNerModel(object):
                 scope='att1'
             )
             Attoutput = tf.expand_dims(Attoutput, 1)
-            conv1 = tf.nn.atrous_conv2d(
-                Attoutput,
-                kernel,
-                rate=1,
+            conv1 = tf.nn.conv2d(
+                input=Attoutput,
+                filters=kernel,
+                strides=[1, 1, 1, 1],
                 padding='SAME',
-                name='conv1'
+                name='Conv1'
             )
-            input = tf.squeeze(conv1, 1)
+            conv1 = tf.nn.relu(conv1)
+            pool1 = tf.nn.max_pool2d(
+                input=conv1,
+                ksize=[1, 2, 2, 1],
+                strides=[1, 1, 1, 1],
+                padding='SAME',
+                name='POOL1'
+            )
+            input = tf.squeeze(pool1, 1)
             att1 = Att(self.dropout_pl)
             Attoutput1 = att1.multiAttention_layer_op(
                 queries=input,
@@ -170,13 +178,21 @@ class GCNNerModel(object):
                 scope='att2'
             )
             Attoutput1 = tf.expand_dims(Attoutput1, 1)
-            conv2 = tf.nn.atrous_conv2d(
-                Attoutput1,
-                kernel1,
-                rate=2,
+            conv2 = tf.nn.conv2d(
+                input=Attoutput1,
+                filters=kernel1,
+                strides=[1, 1, 1, 1],
                 padding='SAME',
-                name='conv2'
+                name='Conv1'
             )
+            pool2 = tf.nn.avg_pool2d(
+                value=conv2,
+                ksize=[1, 2, 2, 1],
+                strides=[1, 1, 1, 1],
+                padding='SAME',
+                name='POOL2'
+            )
+            conv2 = tf.nn.relu(pool2)
             output = tf.squeeze(conv2, 1)
             output = tf.layers.dense(output, 256, use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer())
             output = tf.layers.dense(output, 128, use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer())

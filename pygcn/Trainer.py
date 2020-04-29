@@ -62,7 +62,6 @@ def get_param(iters=100):
     # vocab
     word2id = read_dictionary(os.path.join(root, paths['root_data'], args.train_data, 'word2id.pkl'))
     # embed weight
-    embedd_weight = build_embedding_matrix(os.path.join(root, paths['embedd_path']), word2id)
     search_res = gp_minimize(
         func=target,
         dimensions=spacener,
