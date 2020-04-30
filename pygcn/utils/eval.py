@@ -3,13 +3,14 @@ import os
 
 def conlleval(label_predict, label_path, metric_path):
     """
-
+ 
     :param label_predict:
     :param label_path:
     :param metric_path:
     :return:
     """
-    eval_perl = "./conlleval_rev.pl"
+    root = os.getcwd()
+    eval_perl = os.path.join(root, "pygcn/utils/conlleval_rev.pl")
     with open(label_path, "w", encoding="utf-8") as fw:
         line = []
         for sent_result in label_predict:

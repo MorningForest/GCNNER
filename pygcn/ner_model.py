@@ -135,9 +135,9 @@ class GCNNerModel(object):
 
     def __cnn_att_layer_op(self):
         with tf.variable_scope("AttConv", initializer=tf.contrib.layers.xavier_initializer()):
-            kernel = tf.get_variable(shape=[1, 3, 300, 512], initializer=tf.contrib.layers.xavier_initializer(),
+            kernel = tf.get_variable(shape=[3, 3, 1, 1], initializer=tf.contrib.layers.xavier_initializer(),
                                      name='kernel')
-            kernel1 = tf.get_variable(shape=[1, 5, 512, 512], initializer=tf.contrib.layers.xavier_initializer(),
+            kernel1 = tf.get_variable(shape=[3, 3, 1, 1], initializer=tf.contrib.layers.xavier_initializer(),
                                       name='kernel1')
             # kernel2 = tf.get_variable(shape=[1, 3, 360, 420], initializer=tf.contrib.layers.xavier_initializer(),
             #                           name='kernel2')
@@ -151,9 +151,9 @@ class GCNNerModel(object):
                 values=self.word_embeddings,
                 num_heads=6,
                 scope='att1',
-                scope1="att2_2"
+                scope1='att1_1'
             )
-            Attoutput = tf.expand_dims(Attoutput, 1)
+            Attoutput = tf.expand_dims(Attoutput, -1)
             conv1 = tf.nn.conv2d(
                 input=Attoutput,
                 filters=kernel,
@@ -166,37 +166,41 @@ class GCNNerModel(object):
                 input=conv1,
                 ksize=[1, 2, 2, 1],
                 strides=[1, 1, 1, 1],
-                padding='SAME',
-                name='POOL1'
+                padding='SAME'
             )
-            input = tf.squeeze(pool1, 1)
-            att1 = Att(self.dropout_pl)
-            Attoutput1 = att1.multiAttention_layer_op(
-                queries=input,
-                keys=input,
-                values=input,
-                num_heads=8,
-                scope='att2',
-                scope1='att2_2'
-            )
-            Attoutput1 = tf.expand_dims(Attoutput1, 1)
+            # s = tf.shape(pool1)
+            # input = tf.reshape(pool1, [s[0], s[1], -1])
+            # input = tf.squeeze(pool1, -1)
+            # att1 = Att(self.dropout_pl)
+            # Attoutput1 = att1.multiAttention_layer_op(
+            #     queries=input,
+            #     keys=input,
+            #     values=input,
+            #     num_heads=6,
+            #     scope='att2',
+            #     scope1='att2_2'
+            # )
+            # Attoutput1 = tf.expand_dims(Attoutput1, -1)
+            # Attoutput1 = tf.reshape(Attoutput1, [s[0], s[1], s[2], 3])
             conv2 = tf.nn.conv2d(
-                input=Attoutput1,
+                input=pool1,
                 filters=kernel1,
                 strides=[1, 1, 1, 1],
                 padding='SAME',
-                name='Conv1'
+                name='Conv2'
             )
-            pool2 = tf.nn.avg_pool2d(
-                value=conv2,
+            conv2 = tf.nn.relu(conv2)
+            pool2 = tf.nn.max_pool2d(
+                input=conv2,
                 ksize=[1, 2, 2, 1],
                 strides=[1, 1, 1, 1],
                 padding='SAME',
                 name='POOL2'
             )
-            conv2 = tf.nn.relu(pool2)
-            output = tf.squeeze(conv2, 1)
-            output = tf.layers.dense(output, 256, use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer())
+            pool2 = tf.nn.dropout(pool2, self.dropout_pl)
+            output = tf.squeeze(pool2, -1)
+            # output = tf.reshape(pool2, [s[0], s[1], s[2], -1])
+            # output = tf.layers.dense(output, 256, use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer())
             output = tf.layers.dense(output, 128, use_bias=True, kernel_initializer=tf.contrib.layers.xavier_initializer())
             self.Att_Conv = output
 
